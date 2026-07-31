@@ -5,3 +5,6 @@ data/cache/
 *.pyc
 __pycache__/
 .venv/
+
+# pytest
+.pytest_cache/

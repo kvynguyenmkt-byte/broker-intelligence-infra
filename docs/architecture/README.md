@@ -19,7 +19,15 @@ Cập nhật: 2026-07-31
 | 11 | Storage | ⬜ Chưa viết | — |
 | 12 | Scalability | ⬜ Chưa viết | — |
 
-Mã nguồn: chưa bắt đầu. Xem `CLAUDE.md` mục 7 để biết thứ tự hiện thực.
+Mã nguồn: đang hiện thực theo `CLAUDE.md` mục 7.
+
+| Bước | Module | Trạng thái |
+|---|---|---|
+| 1 | `core` (types, provenance, identity, errors, logging) + unit test | ✅ Xong — chờ review |
+| 2 | `intake` | ⬜ Chưa bắt đầu (mở khoá sau khi review core) |
+
+Lưu ý thứ tự: adapter/collector (bước 3–4) cần `config/schemas/canonical.v1.json`
+của Phase 9 trước khi viết. Phase 9 chưa chốt nên hiện chỉ dừng ở `core` → `intake`.
 
 ---
 
