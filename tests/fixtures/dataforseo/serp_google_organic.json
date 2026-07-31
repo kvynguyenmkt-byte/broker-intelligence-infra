@@ -1,0 +1,30 @@
+{
+  "version": "0.1.20260601",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "tasks": [
+    {
+      "id": "07311200-serp-0001",
+      "status_code": 20000,
+      "result": [
+        {
+          "keyword": "sàn forex uy tín",
+          "type": "organic",
+          "se_domain": "google.com.vn",
+          "location_code": 1028581,
+          "language_code": "vi",
+          "check_url": "https://www.google.com.vn/search?q=s%C3%A0n+forex+uy+t%C3%ADn",
+          "items": [
+            { "type": "paid", "rank_absolute": 1, "domain": "exness.com", "url": "https://lp.exness.com/vn/" },
+            { "type": "paid", "rank_absolute": 2, "domain": "fpmarkets.com", "url": "https://go.fpmarkets.com/vn/" },
+            { "type": "people_also_ask", "rank_absolute": 3 },
+            { "type": "organic", "rank_absolute": 4, "domain": "topbrokerreview.com", "url": "https://topbrokerreview.com/best-forex-brokers-vietnam/" },
+            { "type": "organic", "rank_absolute": 5, "domain": "exness.com", "url": "https://exness.com/vn/" },
+            { "type": "organic", "rank_absolute": 6, "domain": "hocforex.net", "url": "https://hocforex.net/san-forex/" },
+            { "type": "paid", "rank_absolute": 7, "domain": "vantagemarkets.com", "url": "https://promo.vantagemarkets.com/vn/" }
+          ]
+        }
+      ]
+    }
+  ]
+}

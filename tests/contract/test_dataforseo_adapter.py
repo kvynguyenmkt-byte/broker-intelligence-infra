@@ -43,11 +43,12 @@ def adapter():
 
 
 def test_capabilities(adapter):
-    assert adapter.capabilities() == {
+    # DataForSEO phục vụ keyword metrics (SERP kiểm ở test_dataforseo_serp.py)
+    assert {
         CAP_KEYWORD_VOLUME,
         CAP_KEYWORD_CPC,
         CAP_KEYWORD_COMPETITION,
-    }
+    } <= adapter.capabilities()
 
 
 def test_parse_returns_row_per_keyword(adapter):

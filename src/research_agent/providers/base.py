@@ -21,6 +21,7 @@ CAP_KEYWORD_CPC = "keyword_cpc"
 CAP_KEYWORD_COMPETITION = "keyword_competition"
 CAP_ORGANIC_COMPETITORS = "organic_competitors"
 CAP_ORGANIC_KEYWORDS = "organic_keywords"
+CAP_SERP_SNAPSHOT = "serp_snapshot"
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,22 @@ class CompetitorDomainRow:
     domain: str
     sample_url: Optional[str] = None
     reported_common_keywords: Optional[int] = None
+
+
+@dataclass(frozen=True)
+class SerpResultRow:
+    """Một mục SERP đã tách khỏi format provider và quy về mô hình khối (Phase 5).
+
+    block_rank + rank_in_block, KHÔNG position đơn lẻ (ADR-013). `is_ad` tách quảng
+    cáo khỏi organic.
+    """
+
+    block_type: str
+    block_rank: int
+    rank_in_block: int
+    domain: str
+    url: Optional[str]
+    is_ad: bool
 
 
 class ProviderAdapter(abc.ABC):
@@ -99,3 +116,17 @@ class CompetitorProvider(ProviderAdapter):
     @abc.abstractmethod
     def parse_organic_keywords(self, envelope: FetchEnvelope) -> list[str]:
         """Hàm THUẦN: raw → danh sách keyword (raw string). Contract-test trên fixture."""
+
+
+class SerpProvider(ProviderAdapter):
+    """Adapter phục vụ serp_snapshot (Phase 5)."""
+
+    @abc.abstractmethod
+    def fetch_serp(
+        self, keyword: str, *, location_code, language_code, device: str
+    ) -> FetchEnvelope:
+        """Chạm mạng. KHÔNG unit-test offline."""
+
+    @abc.abstractmethod
+    def parse_serp(self, envelope: FetchEnvelope) -> list[SerpResultRow]:
+        """Hàm THUẦN: raw → SerpResultRow[] theo mô hình khối. Contract-test trên fixture."""

@@ -129,9 +129,9 @@ Lý do: canonical model gần như chắc chắn sai ở lần đầu. Phát hi�
 
 Mã nguồn: đã thông end-to-end offline —
 `core/` + `intake/` + `providers/` (DataForSeoAdapter, AhrefsAdapter) +
-`collectors/keyword_research/` (Phase 4) + `collectors/competitor_discovery/` (Phase 3),
-xuất JSON hợp lệ theo `config/schemas/canonical.v1.json`. Các collector còn lại
-(Phase 5 SERP, 6 landing_page, 7 ad_intelligence, 8 competitor_intelligence) chưa hiện thực.
+`collectors/keyword_research/` (Phase 4) + `collectors/competitor_discovery/` (Phase 3) +
+`collectors/serp_research/` (Phase 5), xuất JSON hợp lệ theo `config/schemas/canonical.v1.json`.
+Các collector còn lại (Phase 6 landing_page, 7 ad_intelligence, 8 competitor_intelligence) chưa hiện thực.
 
 Xem `docs/architecture/README.md` để biết nhật ký quyết định và việc còn lại.
 Xem `HANDOFF.md` để biết cách tiếp tục.
