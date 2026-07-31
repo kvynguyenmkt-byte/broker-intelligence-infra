@@ -9,6 +9,7 @@ from research_agent.core.errors import (
     Severity,
 )
 from research_agent.core.identity import (
+    entity_id,
     market_key,
     market_run_id,
     now_utc,
@@ -41,6 +42,7 @@ __all__ = [
     "market_key",
     "run_id",
     "market_run_id",
+    "entity_id",
     "now_utc",
     # errors
     "Severity",

@@ -19,15 +19,24 @@ Cập nhật: 2026-07-31
 | 11 | Storage | ⬜ Chưa viết | — |
 | 12 | Scalability | ⬜ Chưa viết | — |
 
-Mã nguồn: đang hiện thực theo `CLAUDE.md` mục 7.
+Mã nguồn: lát cắt dọc đầu tiên (`CLAUDE.md` mục 7) đã thông end-to-end, offline.
 
 | Bước | Module | Trạng thái |
 |---|---|---|
-| 1 | `core` (types, provenance, identity, errors, logging) + unit test | ✅ Xong — chờ review |
-| 2 | `intake` | ⬜ Chưa bắt đầu (mở khoá sau khi review core) |
+| 1 | `core` (types, provenance, identity, errors, logging) | ✅ Xong + unit test |
+| 2 | `intake` (6 chặng, PSL, market_resolver) | ✅ Xong + unit test |
+| 3 | `providers` (base, registry, DataForSeoAdapter) | ✅ Xong + contract test |
+| 4 | `collectors/keyword_research` | ✅ Xong |
+| 5 | End-to-end 1 broker × 1 market (VN-vi) → JSON hợp lệ | ✅ Xong (test offline trên fixture) |
+| 6 | Nhân rộng adapter/collector còn lại | ⬜ Chỉ làm sau khi luồng trên được review |
 
-Lưu ý thứ tự: adapter/collector (bước 3–4) cần `config/schemas/canonical.v1.json`
-của Phase 9 trước khi viết. Phase 9 chưa chốt nên hiện chỉ dừng ở `core` → `intake`.
+`config/schemas/canonical.v1.json` hiện là **lát cắt tối thiểu** của Phase 9 (chỉ
+`Provenance`/`Measurement`/`Keyword`). Phase 9 đầy đủ (cmp_/srp_/lp_/ad_/prf_) vẫn
+chưa chốt — cần hoàn tất trước khi mở các collector còn lại.
+
+Việc con người còn nợ (HANDOFF mục 5): điền `location_code` thật vào
+`config/markets.yaml` từ endpoint `/locations`, và nạp credentials provider. Code
+đã chạy + test offline không cần hai thứ này; **chạy thật** thì cần.
 
 ---
 

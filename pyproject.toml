@@ -7,7 +7,11 @@ name = "research-agent"
 version = "0.1.0"
 description = "Research Agent — Google Ads Intelligence for Forex/CFD/Crypto brokers"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "jsonschema>=4.20",
+    "tldextract>=5.0",
+    "pyyaml>=6.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4"]

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://internal/research-agent/schemas/canonical.v1.json",
+  "title": "CanonicalModel",
+  "description": "LÁT CẮT tối thiểu của Phase 9 (Output Schema) — hiện chỉ định nghĩa Provenance, Measurement và Keyword để mở khoá collector keyword_research. Phase 9 đầy đủ (cmp_/srp_/lp_/ad_/prf_) chưa chốt. additionalProperties:false ở mọi nơi để cấm field khuyến nghị (CLAUDE.md mục 1, ADR-002).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "keywords"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "keywords": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Keyword" }
+    }
+  },
+  "$defs": {
+    "Reliability": {
+      "enum": ["hard", "estimate", "inferred"]
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider_id", "endpoint", "fetched_at", "reliability"],
+      "properties": {
+        "provider_id": { "type": "string", "minLength": 1 },
+        "endpoint": { "type": "string", "minLength": 1 },
+        "fetched_at": { "type": "string", "format": "date-time" },
+        "reliability": { "$ref": "#/$defs/Reliability" },
+        "is_biased_source": { "type": "boolean", "default": false },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["provider_id", "value"],
+            "properties": {
+              "provider_id": { "type": "string" },
+              "value": {},
+              "note": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "Measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "value=null BẮT BUỘC kèm missing_reason (No fabrication — CLAUDE.md mục 2).",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": ["number", "string", "boolean", "null"] },
+        "unit": { "type": "string", "minLength": 1 },
+        "provenance": {
+          "oneOf": [{ "$ref": "#/$defs/Provenance" }, { "type": "null" }]
+        },
+        "missing_reason": { "type": ["string", "null"] }
+      }
+    },
+    "Keyword": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kw_id",
+        "market_key",
+        "keyword_raw",
+        "keyword_normalized",
+        "has_diacritics",
+        "is_branded",
+        "search_volume",
+        "cpc",
+        "competition_index"
+      ],
+      "properties": {
+        "kw_id": { "type": "string", "pattern": "^kw_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "keyword_raw": { "type": "string", "minLength": 1 },
+        "keyword_normalized": { "type": "string", "minLength": 1 },
+        "has_diacritics": { "type": "boolean" },
+        "is_branded": { "type": "boolean" },
+        "search_volume": { "$ref": "#/$defs/Measurement" },
+        "cpc": { "$ref": "#/$defs/Measurement" },
+        "competition_index": { "$ref": "#/$defs/Measurement" }
+      }
+    }
+  }
+}

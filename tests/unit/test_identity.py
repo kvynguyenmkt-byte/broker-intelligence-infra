@@ -57,3 +57,23 @@ def test_market_run_id_formula():
 
 def test_now_utc_is_timezone_aware():
     assert identity.now_utc().tzinfo is not None
+
+
+def test_entity_id_deterministic_and_prefixed():
+    a = identity.entity_id("kw", "VN-vi", "san forex")
+    b = identity.entity_id("kw", "VN-vi", "san forex")
+    assert a == b
+    assert a.startswith("kw_")
+    # khớp pattern canonical ^kw_[a-z0-9]+$
+    import re
+    assert re.fullmatch(r"kw_[a-z0-9]+", a)
+
+
+def test_entity_id_varies_with_parts():
+    assert identity.entity_id("kw", "VN-vi", "a") != identity.entity_id("kw", "VN-vi", "b")
+    assert identity.entity_id("kw", "VN-vi", "a") != identity.entity_id("kw", "ID-id", "a")
+
+
+def test_entity_id_requires_prefix():
+    with pytest.raises(ValueError):
+        identity.entity_id("", "x")

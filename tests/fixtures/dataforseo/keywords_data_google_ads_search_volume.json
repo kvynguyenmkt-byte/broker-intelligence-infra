@@ -1,0 +1,58 @@
+{
+  "version": "0.1.20260601",
+  "status_code": 20000,
+  "status_message": "Ok.",
+  "tasks": [
+    {
+      "id": "07311200-fixture-0001",
+      "status_code": 20000,
+      "status_message": "Ok.",
+      "result": [
+        {
+          "keyword": "sàn forex uy tín",
+          "location_code": 1028581,
+          "language_code": "vi",
+          "search_partners": false,
+          "competition": "HIGH",
+          "competition_index": 88,
+          "search_volume": 12100,
+          "low_top_of_page_bid": 1.21,
+          "high_top_of_page_bid": 4.55,
+          "cpc": 2.73,
+          "monthly_searches": [
+            {"year": 2026, "month": 6, "search_volume": 12100},
+            {"year": 2026, "month": 5, "search_volume": 9900}
+          ]
+        },
+        {
+          "keyword": "san forex uy tin",
+          "location_code": 1028581,
+          "language_code": "vi",
+          "search_partners": false,
+          "competition": "HIGH",
+          "competition_index": 84,
+          "search_volume": 8100,
+          "low_top_of_page_bid": 1.10,
+          "high_top_of_page_bid": 4.10,
+          "cpc": 2.51,
+          "monthly_searches": [
+            {"year": 2026, "month": 6, "search_volume": 8100}
+          ]
+        },
+        {
+          "keyword": "exness lừa đảo",
+          "location_code": 1028581,
+          "language_code": "vi",
+          "search_partners": false,
+          "competition": null,
+          "competition_index": null,
+          "search_volume": null,
+          "low_top_of_page_bid": null,
+          "high_top_of_page_bid": null,
+          "cpc": null,
+          "monthly_searches": null
+        }
+      ]
+    }
+  ]
+}

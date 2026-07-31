@@ -8,6 +8,7 @@ Thời gian được TRUYỀN VÀO, không đọc đồng hồ ngầm, để run
 """
 from __future__ import annotations
 
+import hashlib
 import re
 import unicodedata
 from datetime import datetime, timezone
@@ -17,6 +18,7 @@ __all__ = [
     "market_key",
     "run_id",
     "market_run_id",
+    "entity_id",
     "now_utc",
 ]
 
@@ -74,6 +76,19 @@ def market_run_id(run_id_value: str, market_key_value: str) -> str:
     if not run_id_value or not market_key_value:
         raise ValueError("market_run_id cần cả run_id và market_key.")
     return f"{run_id_value}__{market_key_value}"
+
+
+def entity_id(prefix: str, *parts: str) -> str:
+    """ID entity tất định: {prefix}_{hash12} từ các khoá tự nhiên (Phase 9).
+
+    Tiền tố chốt ở HANDOFF: cmp_, kw_, clu_, srp_, lp_, ad_, prf_. Cùng khoá →
+    cùng ID → tham chiếu chéo và dedup ổn định, không lồng trùng dữ liệu.
+    """
+    if not prefix:
+        raise ValueError("entity_id cần prefix.")
+    joined = "\x1f".join(parts)
+    digest = hashlib.sha1(joined.encode("utf-8")).hexdigest()[:12]
+    return f"{prefix}_{digest}"
 
 
 def now_utc() -> datetime:
