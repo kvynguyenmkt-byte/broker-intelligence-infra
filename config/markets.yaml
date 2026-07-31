@@ -1,0 +1,123 @@
+# markets.yaml — Anh xa market_key sang ma vung cua tung provider
+#
+# CANH BAO: cac truong location_code duoi day de NULL co chu dich.
+# KHONG duoc doan hoac dien tay. Phai lay tu endpoint /locations cua tung
+# nha cung cap roi ghi vao, kem ngay lay. Dien sai ma vung se lam toan bo
+# du lieu keyword va SERP sai lech ma khong co canh bao nao.
+#
+# Lenh lay ma vung DataForSEO:
+#   GET https://api.dataforseo.com/v3/keywords_data/google_ads/locations
+# Lenh lay ngon ngu DataForSEO:
+#   GET https://api.dataforseo.com/v3/keywords_data/google_ads/languages
+
+version: 1
+verified_at: null   # dien ngay sau khi doi chieu voi API that
+
+markets:
+  VN-vi:
+    country: VN
+    language: vi
+    country_name: Vietnam
+    language_name: Vietnamese
+    providers:
+      dataforseo:   { location_code: null, language_code: "vi" }
+      ahrefs:       { country: "vn" }
+      semrush:      { database: "vn" }
+      google_trends: { geo: "VN" }
+      similarweb:   { country: "vn" }
+    notes: >-
+      Nguoi dung tim kiem ca co dau va khong dau. "san forex uy tin" va
+      "san forex uy tin" khong dau la hai keyword khac nhau, volume khac nhau,
+      cung intent. Khong duoc gop mu. Xem CLAUDE.md muc 6.
+
+  ID-id:
+    country: ID
+    language: id
+    country_name: Indonesia
+    language_name: Indonesian
+    providers:
+      dataforseo:   { location_code: null, language_code: "id" }
+      ahrefs:       { country: "id" }
+      semrush:      { database: "id" }
+      google_trends: { geo: "ID" }
+      similarweb:   { country: "id" }
+    notes: >-
+      Tai khoan swap-free / Islamic la yeu to quyet dinh o thi truong nay.
+      Phai co trong taxonomy keyword o Phase 4.
+
+  TH-th:
+    country: TH
+    language: th
+    country_name: Thailand
+    language_name: Thai
+    providers:
+      dataforseo:   { location_code: null, language_code: "th" }
+      ahrefs:       { country: "th" }
+      semrush:      { database: "th" }
+      google_trends: { geo: "TH" }
+      similarweb:   { country: "th" }
+    notes: "Thi truong phu thuoc nhieu vao broker offshore."
+
+  MY-ms:
+    country: MY
+    language: ms
+    country_name: Malaysia
+    language_name: Malay
+    providers:
+      dataforseo:   { location_code: null, language_code: "ms" }
+      ahrefs:       { country: "my" }
+      semrush:      { database: "my" }
+      google_trends: { geo: "MY" }
+      similarweb:   { country: "my" }
+    notes: >-
+      Malaysia da ngon ngu. MY-ms, MY-en va MY-zh phai la ba market RIENG BIET,
+      khong duoc gop. Swap-free cung quan trong tuong tu Indonesia.
+
+  MY-en:
+    country: MY
+    language: en
+    country_name: Malaysia
+    language_name: English
+    providers:
+      dataforseo:   { location_code: null, language_code: "en" }
+      ahrefs:       { country: "my" }
+      semrush:      { database: "my" }
+      google_trends: { geo: "MY" }
+      similarweb:   { country: "my" }
+
+  PH-en:
+    country: PH
+    language: en
+    country_name: Philippines
+    language_name: English
+    providers:
+      dataforseo:   { location_code: null, language_code: "en" }
+      ahrefs:       { country: "ph" }
+      semrush:      { database: "ph" }
+      google_trends: { geo: "PH" }
+      similarweb:   { country: "ph" }
+
+  SG-en:
+    country: SG
+    language: en
+    country_name: Singapore
+    language_name: English
+    providers:
+      dataforseo:   { location_code: null, language_code: "en" }
+      ahrefs:       { country: "sg" }
+      semrush:      { database: "sg" }
+      google_trends: { geo: "SG" }
+      similarweb:   { country: "sg" }
+    notes: "Quy dinh quang cao tai chinh chat che hon phan con lai cua khu vuc."
+
+# ---------------------------------------------------------------------------
+# Cap country+language duoc coi la hop ly. Cap ngoai danh sach nay khong bi
+# tu choi, chi gan market_plausibility=low (xem Phase 2 muc 5.2).
+# ---------------------------------------------------------------------------
+plausible_pairs:
+  VN: [vi, en]
+  ID: [id, en]
+  TH: [th, en]
+  MY: [ms, en, zh]
+  PH: [en, tl]
+  SG: [en, zh, ms, ta]

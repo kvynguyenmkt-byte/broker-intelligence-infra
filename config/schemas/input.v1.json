@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://internal/research-agent/schemas/input.v1.json",
+  "title": "ResearchRequest",
+  "description": "Hop dong dau vao cua Research Agent. Xem docs/architecture/phase-02-input-design.md",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["broker_name", "broker_website", "markets"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "default": "1.0.0"
+    },
+    "broker_name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "broker_website": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2048
+    },
+    "broker_aliases": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 120 },
+      "default": []
+    },
+    "markets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/Market" }
+    },
+    "known_competitors": {
+      "type": "array",
+      "maxItems": 50,
+      "items": { "type": "string", "maxLength": 253 },
+      "default": []
+    },
+    "excluded_domains": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "type": "string", "maxLength": 253 },
+      "default": []
+    },
+    "modules": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "competitor_discovery",
+          "keyword_research",
+          "serp_research",
+          "landing_page_discovery",
+          "ad_intelligence",
+          "competitor_intelligence",
+          "compliance_context"
+        ]
+      }
+    },
+    "depth": {
+      "enum": ["quick", "standard", "deep"],
+      "default": "standard",
+      "description": "Tran keyword moi market: quick=300, standard=1500, deep=5000"
+    },
+    "max_competitors": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 20
+    },
+    "freshness_policy": {
+      "enum": ["force_refresh", "prefer_cache", "cache_only"],
+      "default": "prefer_cache"
+    },
+    "cost_ceiling": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["currency", "amount"],
+      "properties": {
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "amount": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "default": null
+    },
+    "dry_run": {
+      "type": "boolean",
+      "default": false,
+      "description": "Chay validate va uoc tinh chi phi, khong goi API"
+    },
+    "provider_overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "dataforseo",
+          "ahrefs",
+          "semrush",
+          "google_keyword_planner",
+          "google_trends",
+          "google_search",
+          "ads_transparency",
+          "similarweb"
+        ]
+      },
+      "default": {}
+    },
+    "requested_by": { "type": ["string", "null"], "maxLength": 200, "default": null },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 2000,
+      "default": null,
+      "description": "Ghi chu tu do. KHONG BAO GIO duoc di vao dataset dau ra."
+    }
+  },
+  "$defs": {
+    "Market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["country", "language"],
+      "properties": {
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2, chu hoa"
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+          "description": "BCP-47, chu thuong"
+        }
+      }
+    }
+  }
+}

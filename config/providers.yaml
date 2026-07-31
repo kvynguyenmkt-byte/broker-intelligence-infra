@@ -1,0 +1,122 @@
+# providers.yaml — Capability matrix, fallback chain, TTL cache
+# Tang collectors KHONG BAO GIO doc file nay. Chi tang providers doc.
+# Xem docs/architecture/phase-01-system-architecture.md muc 2.2
+
+version: 1
+
+# ---------------------------------------------------------------------------
+# Dinh nghia nha cung cap
+# credentials CHI doc tu bien moi truong, khong bao gio ghi o day
+# ---------------------------------------------------------------------------
+providers:
+  dataforseo:
+    env: [DATAFORSEO_LOGIN, DATAFORSEO_PASSWORD]
+    billing: per_query
+    rate_limit: { requests_per_minute: 2000, concurrent: 20 }
+    notes: "Nguon chinh. Phu ngon ngu phi tieng Anh mong hon Ahrefs/SEMrush."
+
+  ahrefs:
+    env: [AHREFS_API_TOKEN]
+    billing: per_row
+    rate_limit: { requests_per_minute: 60, concurrent: 5 }
+    notes: "Manh o backlink, authority, organic competitors. Doi chieu ngon ngu ban dia."
+
+  semrush:
+    env: [SEMRUSH_API_KEY]
+    billing: per_unit
+    rate_limit: { requests_per_minute: 100, concurrent: 10 }
+    notes: "Manh o paid keyword va ad copy lich su."
+
+  google_keyword_planner:
+    env: [GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_REFRESH_TOKEN]
+    billing: free_with_account
+    rate_limit: { requests_per_minute: 60, concurrent: 3 }
+    notes: "Volume goc tu Google nhung dang khoang. Can tai khoan Ads dang chi tieu."
+
+  google_trends:
+    env: []
+    billing: free
+    rate_limit: { requests_per_minute: 10, concurrent: 1 }
+    notes: "Chi so tuong doi 0-100, KHONG phai volume tuyet doi. Luon gan reliability=estimate."
+
+  google_search:
+    env: []
+    billing: free
+    rate_limit: { requests_per_minute: 5, concurrent: 1 }
+    notes: "Chi dung de xac minh thu cong. Khong scrape hang loat."
+
+  ads_transparency:
+    env: []
+    billing: free
+    rate_limit: { requests_per_minute: 20, concurrent: 2 }
+    notes: "Do phu theo quoc gia khong deu. Phai ghi nhan khi market khong co du lieu."
+
+  similarweb:
+    env: [SIMILARWEB_API_KEY]
+    billing: per_call
+    rate_limit: { requests_per_minute: 60, concurrent: 5 }
+    notes: "Traffic tong va channel mix. LUON la estimate, khong bao gio hard."
+
+# ---------------------------------------------------------------------------
+# Capability -> chuoi fallback theo thu tu
+# Collector khai bao capability, KHONG khai bao provider
+# ---------------------------------------------------------------------------
+capabilities:
+  keyword_volume:        [dataforseo, google_keyword_planner, ahrefs, semrush]
+  keyword_cpc:           [dataforseo, google_keyword_planner, semrush, ahrefs]
+  keyword_competition:   [dataforseo, google_keyword_planner, semrush]
+  keyword_ideas:         [dataforseo, ahrefs, semrush]
+  keyword_trend:         [google_trends, dataforseo]
+  serp_snapshot:         [dataforseo, semrush]
+  organic_keywords:      [ahrefs, semrush, dataforseo]
+  paid_keywords:         [semrush, dataforseo, ahrefs]
+  organic_competitors:   [ahrefs, semrush, dataforseo]
+  paid_competitors:      [semrush, dataforseo]
+  top_pages:             [ahrefs, semrush, dataforseo]
+  paid_pages:            [semrush, dataforseo]
+  ad_creative:           [ads_transparency, semrush, dataforseo]
+  backlinks:             [ahrefs, semrush]
+  referring_domains:     [ahrefs, semrush]
+  domain_authority:      [ahrefs, semrush]
+  traffic_estimate:      [similarweb, ahrefs, semrush]
+  traffic_by_country:    [similarweb, semrush]
+  traffic_channel_mix:   [similarweb]
+
+# ---------------------------------------------------------------------------
+# TTL cache theo loai du lieu (ADR-008)
+# KHONG dung mot TTL chung: du lieu quang cao bien dong nhanh hon backlink nhieu lan
+# ---------------------------------------------------------------------------
+cache_ttl_days:
+  ad_creative:        3
+  serp_snapshot:      7
+  landing_page:       7
+  backlinks:          14
+  domain_authority:   14
+  referring_domains:  14
+  keyword_volume:     30
+  keyword_cpc:        30
+  traffic_estimate:   30
+  compliance_context: 30
+
+# ---------------------------------------------------------------------------
+# Tran quy mo (ADR-009)
+# ---------------------------------------------------------------------------
+limits:
+  max_markets_per_run: 20
+  max_seed_competitors: 50
+  max_competitors_kept_per_market: 50
+  default_competitors_kept_per_market: 20
+  max_keywords_per_market:
+    quick: 300
+    standard: 1500
+    deep: 5000
+
+# ---------------------------------------------------------------------------
+# Retry
+# ---------------------------------------------------------------------------
+retry:
+  max_attempts: 3
+  backoff: exponential
+  base_delay_seconds: 2
+  retry_on: [429, 500, 502, 503, 504, timeout]
+  never_retry_on: [400, 401, 403, 404]

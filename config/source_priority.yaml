@@ -1,0 +1,103 @@
+# source_priority.yaml — Xu ly khi nhieu nguon cho gia tri khac nhau
+# Nguyen tac: KHONG BAO GIO lay trung binh. Chon theo uu tien, ghi lai tat ca.
+
+version: 1
+
+# ---------------------------------------------------------------------------
+# Quy tac chung
+# ---------------------------------------------------------------------------
+rules:
+  never_average: true
+  store_all_values: true          # luu values_by_source[] day du
+  record_conflicts: true          # ghi conflicts[] khi lech
+  divergence_flag_threshold: 3.0  # max/min > 3 lan -> gan low_agreement
+  low_agreement_confidence_cap: 0.5
+
+# ---------------------------------------------------------------------------
+# Uu tien theo tung metric
+# Danh sach xep tu cao xuong thap
+# ---------------------------------------------------------------------------
+metric_priority:
+  search_volume:
+    - google_keyword_planner   # nguon goc tu Google
+    - dataforseo
+    - ahrefs
+    - semrush
+
+  cpc:
+    - google_keyword_planner
+    - dataforseo
+    - semrush
+    - ahrefs
+
+  competition_index:
+    - google_keyword_planner
+    - dataforseo
+    - semrush
+
+  serp_result:
+    - dataforseo
+    - semrush
+
+  ad_creative:
+    - ads_transparency         # nguon co tham quyen nhat cho quang cao
+    - semrush
+    - dataforseo
+
+  organic_traffic_estimate:
+    - ahrefs
+    - semrush
+    - similarweb
+
+  total_traffic_estimate:
+    - similarweb
+    - semrush
+
+  paid_traffic_estimate:
+    - semrush
+    - similarweb
+
+  referring_domain_count:
+    - ahrefs
+    - semrush
+
+  domain_authority:
+    - ahrefs                   # DR va AS la hai thang KHAC NHAU
+    - semrush                  # KHONG duoc quy doi lan nhau
+
+# ---------------------------------------------------------------------------
+# Tran do tin cay theo metric
+# Mot so metric ve ban chat la uoc luong, khong bao gio duoc gan 'hard'
+# ---------------------------------------------------------------------------
+reliability_cap:
+  total_traffic_estimate:   estimate
+  organic_traffic_estimate: estimate
+  paid_traffic_estimate:    estimate
+  traffic_by_country:       estimate
+  traffic_channel_mix:      estimate
+  domain_authority:         estimate
+  keyword_trend:            estimate
+  ad_spend_estimate:        estimate
+
+# ---------------------------------------------------------------------------
+# Nguon thien lech — phai gan co khi xuat hien trong ket qua
+# Trong nganh forex, phan lon site review va bang xep hang "san tot nhat"
+# do affiliate viet, tuc la doi thu co dong co tai chinh
+# ---------------------------------------------------------------------------
+biased_source_signals:
+  url_patterns:
+    - "/review"
+    - "/danh-gia"
+    - "/best-"
+    - "/top-"
+    - "/san-forex-uy-tin"
+    - "/broker-comparison"
+  affiliate_query_params:
+    - ref
+    - refid
+    - aff
+    - affid
+    - partner
+    - clickid
+    - utm_campaign
+  action: flag_only            # khong loai bo, chi gan bien_source=true
