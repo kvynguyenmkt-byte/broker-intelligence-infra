@@ -1,22 +1,37 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://internal/research-agent/schemas/canonical.v1.json",
-  "title": "CanonicalModel",
-  "description": "LÁT CẮT tối thiểu của Phase 9 (Output Schema) — hiện chỉ định nghĩa Provenance, Measurement và Keyword để mở khoá collector keyword_research. Phase 9 đầy đủ (cmp_/srp_/lp_/ad_/prf_) chưa chốt. additionalProperties:false ở mọi nơi để cấm field khuyến nghị (CLAUDE.md mục 1, ADR-002).",
+  "title": "CanonicalDataset",
+  "description": "Hợp đồng đầu ra của Research Agent (Phase 9 — ĐÃ CHỐT). Mô hình quan hệ, tham chiếu chéo bằng ID, KHÔNG lồng trùng dữ liệu. Mọi metric dùng chung $defs/Measurement; mọi observed snapshot mang $defs/Provenance ở cấp entity. additionalProperties:false khắp nơi và KHÔNG field khuyến nghị (CLAUDE.md mục 1, ADR-002). Không tồn tại field text tự do do model sinh ra: mọi chuỗi có hậu tố _observed là nguyên văn quan sát kèm provenance.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "keywords"],
+  "required": ["schema_version"],
   "properties": {
     "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "keywords": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/Keyword" }
-    }
+    "run_id": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "competitors": { "type": "array", "items": { "$ref": "#/$defs/Competitor" } },
+    "keywords": { "type": "array", "items": { "$ref": "#/$defs/Keyword" } },
+    "keyword_clusters": { "type": "array", "items": { "$ref": "#/$defs/KeywordCluster" } },
+    "serp_snapshots": { "type": "array", "items": { "$ref": "#/$defs/SerpSnapshot" } },
+    "landing_pages": { "type": "array", "items": { "$ref": "#/$defs/LandingPage" } },
+    "ads": { "type": "array", "items": { "$ref": "#/$defs/Ad" } },
+    "competitor_profiles": { "type": "array", "items": { "$ref": "#/$defs/CompetitorProfile" } }
   },
   "$defs": {
-    "Reliability": {
-      "enum": ["hard", "estimate", "inferred"]
+    "Reliability": { "enum": ["hard", "estimate", "inferred"] },
+
+    "Conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider_id", "value"],
+      "properties": {
+        "provider_id": { "type": "string" },
+        "value": {},
+        "note": { "type": ["string", "null"] }
+      }
     },
+
     "Provenance": {
       "type": "object",
       "additionalProperties": false,
@@ -27,48 +42,73 @@
         "fetched_at": { "type": "string", "format": "date-time" },
         "reliability": { "$ref": "#/$defs/Reliability" },
         "is_biased_source": { "type": "boolean", "default": false },
-        "conflicts": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["provider_id", "value"],
-            "properties": {
-              "provider_id": { "type": "string" },
-              "value": {},
-              "note": { "type": ["string", "null"] }
-            }
-          }
-        }
+        "conflicts": { "type": "array", "items": { "$ref": "#/$defs/Conflict" } }
       }
     },
+
+    "SourceValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider_id", "value"],
+      "properties": {
+        "provider_id": { "type": "string" },
+        "value": { "type": ["number", "string", "boolean", "null"] },
+        "unit": { "type": ["string", "null"] }
+      }
+    },
+
     "Measurement": {
       "type": "object",
       "additionalProperties": false,
-      "description": "value=null BẮT BUỘC kèm missing_reason (No fabrication — CLAUDE.md mục 2).",
+      "description": "value=null BẮT BUỘC kèm missing_reason (No fabrication — CLAUDE.md mục 2). Nhiều nguồn: KHÔNG lấy trung bình — chọn theo source_priority.yaml, lưu values_by_source[], ghi divergence_ratio; lệch > 3 lần thì low_agreement=true (ADR-016).",
       "required": ["value", "unit"],
       "properties": {
         "value": { "type": ["number", "string", "boolean", "null"] },
         "unit": { "type": "string", "minLength": 1 },
-        "provenance": {
-          "oneOf": [{ "$ref": "#/$defs/Provenance" }, { "type": "null" }]
-        },
-        "missing_reason": { "type": ["string", "null"] }
+        "provenance": { "oneOf": [{ "$ref": "#/$defs/Provenance" }, { "type": "null" }] },
+        "missing_reason": { "type": ["string", "null"] },
+        "values_by_source": { "type": "array", "items": { "$ref": "#/$defs/SourceValue" } },
+        "divergence_ratio": { "type": ["number", "null"] },
+        "low_agreement": { "type": "boolean", "default": false }
       }
     },
+
+    "Competitor": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Đối thủ phát hiện được cho một market (Phase 3). overlap tính SAU khi loại keyword thương hiệu (ADR-011).",
+      "required": ["cmp_id", "market_key", "domain", "competitor_class", "seed_source", "seed_validated"],
+      "properties": {
+        "cmp_id": { "type": "string", "pattern": "^cmp_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "domain": { "type": "string", "minLength": 1 },
+        "competitor_class": { "enum": ["direct_broker", "affiliate_review", "informational"] },
+        "seed_source": { "enum": ["user", "organic_overlap", "paid_overlap", "serp"] },
+        "seed_validated": { "type": "boolean" },
+        "is_excluded": { "type": "boolean", "default": false },
+        "shared_keyword_count": { "$ref": "#/$defs/Measurement" },
+        "overlap_score": { "$ref": "#/$defs/Measurement" },
+        "classification_signals": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "matches_biased_url_pattern": { "type": "boolean" },
+            "has_broker_license_reference": { "type": "boolean" },
+            "has_review_listicle_pattern": { "type": "boolean" }
+          }
+        },
+        "first_seen_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_seen_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+
     "Keyword": {
       "type": "object",
       "additionalProperties": false,
+      "description": "Keyword theo market (Phase 4). Biến thể có/không dấu là HAI record khác nhau (CLAUDE.md mục 6). Trường enrichment (intent, cluster_id, keyword_trend, serp_snapshot_id) là tuỳ chọn: thiếu thì bỏ trống, KHÔNG bịa.",
       "required": [
-        "kw_id",
-        "market_key",
-        "keyword_raw",
-        "keyword_normalized",
-        "has_diacritics",
-        "is_branded",
-        "search_volume",
-        "cpc",
-        "competition_index"
+        "kw_id", "market_key", "keyword_raw", "keyword_normalized",
+        "has_diacritics", "is_branded", "search_volume", "cpc", "competition_index"
       ],
       "properties": {
         "kw_id": { "type": "string", "pattern": "^kw_[a-z0-9]+$" },
@@ -77,9 +117,132 @@
         "keyword_normalized": { "type": "string", "minLength": 1 },
         "has_diacritics": { "type": "boolean" },
         "is_branded": { "type": "boolean" },
+        "intent": { "enum": ["informational", "navigational", "commercial", "transactional", "trust_check"] },
+        "intent_method": { "enum": ["lexicon", "serp_inferred"] },
+        "cluster_id": { "type": ["string", "null"], "pattern": "^clu_[a-z0-9]+$" },
+        "serp_snapshot_id": { "type": ["string", "null"], "pattern": "^srp_[a-z0-9]+$" },
         "search_volume": { "$ref": "#/$defs/Measurement" },
         "cpc": { "$ref": "#/$defs/Measurement" },
-        "competition_index": { "$ref": "#/$defs/Measurement" }
+        "competition_index": { "$ref": "#/$defs/Measurement" },
+        "keyword_trend": { "$ref": "#/$defs/Measurement" }
+      }
+    },
+
+    "KeywordCluster": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cụm keyword nhận diện bằng CẤU TRÚC, không bằng nhãn prose do model sinh. Danh tính cụm = head_keyword_id (Phase 4, ADR-012).",
+      "required": ["clu_id", "market_key", "head_keyword_id", "member_keyword_ids", "member_count", "cluster_method"],
+      "properties": {
+        "clu_id": { "type": "string", "pattern": "^clu_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "head_keyword_id": { "type": "string", "pattern": "^kw_[a-z0-9]+$" },
+        "member_keyword_ids": { "type": "array", "items": { "type": "string", "pattern": "^kw_[a-z0-9]+$" } },
+        "member_count": { "type": "integer", "minimum": 1 },
+        "cluster_method": { "enum": ["lexical_shared_token", "serp_overlap"] }
+      }
+    },
+
+    "SerpResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Một mục trong SERP. Dùng block_rank + rank_in_block, KHÔNG dùng position đơn lẻ (ADR-013).",
+      "required": ["block_type", "block_rank", "rank_in_block", "domain", "is_ad"],
+      "properties": {
+        "block_type": { "enum": ["ads_top", "ads_bottom", "organic", "local_pack", "shopping", "other"] },
+        "block_rank": { "type": "integer", "minimum": 1 },
+        "rank_in_block": { "type": "integer", "minimum": 1 },
+        "domain": { "type": "string" },
+        "url": { "type": ["string", "null"] },
+        "is_ad": { "type": "boolean" },
+        "landing_page_id": { "type": ["string", "null"], "pattern": "^lp_[a-z0-9]+$" },
+        "ad_id": { "type": ["string", "null"], "pattern": "^ad_[a-z0-9]+$" }
+      }
+    },
+
+    "SerpSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Ảnh chụp SERP cho (keyword, device). device là chiều BẮT BUỘC — ads mobile và desktop khác nhau đáng kể (Phase 5, ADR-013).",
+      "required": ["srp_id", "market_key", "keyword_id", "device", "captured_at", "results", "provenance"],
+      "properties": {
+        "srp_id": { "type": "string", "pattern": "^srp_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "keyword_id": { "type": "string", "pattern": "^kw_[a-z0-9]+$" },
+        "device": { "enum": ["mobile", "desktop"] },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "results": { "type": "array", "items": { "$ref": "#/$defs/SerpResult" } },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      }
+    },
+
+    "LandingPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Trang đích quảng cáo (Phase 6). Tách tham số affiliate khỏi canonical NHƯNG ghi lại danh sách đã tách (ADR-014). observed_title là nguyên văn tiêu đề trang, không phải model sinh.",
+      "required": ["lp_id", "market_key", "url_canonical", "provenance"],
+      "properties": {
+        "lp_id": { "type": "string", "pattern": "^lp_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "url_canonical": { "type": "string", "minLength": 1 },
+        "url_original": { "type": ["string", "null"] },
+        "destination_domain": { "type": ["string", "null"] },
+        "is_dedicated_subdomain": { "type": "boolean", "default": false },
+        "subdomain_label": { "type": ["string", "null"] },
+        "is_noindex": { "type": ["boolean", "null"] },
+        "http_status": { "type": ["integer", "null"] },
+        "is_reachable": { "type": ["boolean", "null"] },
+        "stripped_params": { "type": "array", "items": { "type": "string" } },
+        "redirect_chain": { "type": "array", "items": { "type": "string" } },
+        "observed_title": { "type": ["string", "null"] },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      }
+    },
+
+    "Ad": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Quảng cáo QUAN SÁT ĐƯỢC (Phase 7). Chỉ lưu nguyên văn đã thấy kèm nguồn. Schema CỐ TÌNH không có field chứa câu quảng cáo mới — không có chỗ chứa thì không có chỗ bịa (ADR-015, CLAUDE.md mục 1). Pattern chỉ là cờ hiện diện khách quan, không phải gợi ý.",
+      "required": ["ad_id", "market_key", "advertiser_domain", "source", "provenance"],
+      "properties": {
+        "ad_id": { "type": "string", "pattern": "^ad_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "advertiser_domain": { "type": "string" },
+        "headline_observed": { "type": ["string", "null"] },
+        "description_observed": { "type": ["string", "null"] },
+        "display_url_observed": { "type": ["string", "null"] },
+        "source": { "enum": ["ads_transparency", "semrush", "dataforseo"] },
+        "landing_page_id": { "type": ["string", "null"], "pattern": "^lp_[a-z0-9]+$" },
+        "first_seen_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_seen_at": { "type": ["string", "null"], "format": "date-time" },
+        "observed_flags": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mentions_regulation": { "type": "boolean" },
+            "mentions_bonus_or_promo": { "type": "boolean" },
+            "mentions_leverage": { "type": "boolean" },
+            "mentions_swap_free": { "type": "boolean" }
+          }
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      }
+    },
+
+    "CompetitorProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Hồ sơ định lượng của một đối thủ (Phase 8). Traffic/authority KHÔNG bao giờ hard — trần estimate (CLAUDE.md mục 3). Không lấy trung bình giữa nguồn.",
+      "required": ["prf_id", "competitor_id", "market_key"],
+      "properties": {
+        "prf_id": { "type": "string", "pattern": "^prf_[a-z0-9]+$" },
+        "competitor_id": { "type": "string", "pattern": "^cmp_[a-z0-9]+$" },
+        "market_key": { "type": "string", "pattern": "^[A-Z]{2}-[a-z]{2,3}$" },
+        "domain_authority": { "$ref": "#/$defs/Measurement" },
+        "referring_domain_count": { "$ref": "#/$defs/Measurement" },
+        "organic_traffic_estimate": { "$ref": "#/$defs/Measurement" },
+        "paid_traffic_estimate": { "$ref": "#/$defs/Measurement" },
+        "total_traffic_estimate": { "$ref": "#/$defs/Measurement" }
       }
     }
   }

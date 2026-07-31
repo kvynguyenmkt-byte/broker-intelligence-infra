@@ -125,8 +125,13 @@ Lý do: canonical model gần như chắc chắn sai ở lần đầu. Phát hi�
 
 ## 9. Trạng thái dự án
 
-Đã chốt: Phase 1 (System Architecture), Phase 2 (Input Design).
-Chưa viết: Phase 3–12.
+Đã chốt thiết kế: Phase 1–9 (System Architecture → Output Schema).
+Chưa viết thiết kế: Phase 10 (Validation), 11 (Storage), 12 (Scalability).
+
+Mã nguồn: lát cắt dọc đầu tiên đã thông end-to-end offline —
+`core/` + `intake/` + `providers/` (DataForSeoAdapter) + `collectors/keyword_research/`,
+xuất JSON hợp lệ theo `config/schemas/canonical.v1.json`. Các collector còn lại
+(Phase 3, 5, 6, 7, 8) chưa hiện thực; theo mục 7, chỉ nhân rộng sau khi lát cắt được review.
 
 Xem `docs/architecture/README.md` để biết nhật ký quyết định và việc còn lại.
 Xem `HANDOFF.md` để biết cách tiếp tục.

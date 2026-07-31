@@ -8,13 +8,13 @@ Cập nhật: 2026-07-31
 |---|---|---|---|
 | 1 | System Architecture | ✅ Chốt | `phase-01-system-architecture.md` |
 | 2 | Input Design | ✅ Chốt | `phase-02-input-design.md` |
-| 3 | Competitor Discovery | ⬜ Chưa viết | — |
-| 4 | Keyword Research | ⬜ Chưa viết | — |
-| 5 | SERP Research | ⬜ Chưa viết | — |
-| 6 | Landing Page Discovery | ⬜ Chưa viết | — |
-| 7 | Ad Intelligence | ⬜ Chưa viết | — |
-| 8 | Competitor Intelligence | ⬜ Chưa viết | — |
-| 9 | Output Schema | ⬜ Chưa viết | — |
+| 3 | Competitor Discovery | ✅ Chốt | `phase-03-competitor-discovery.md` |
+| 4 | Keyword Research | ✅ Chốt | `phase-04-keyword-research.md` |
+| 5 | SERP Research | ✅ Chốt | `phase-05-serp-research.md` |
+| 6 | Landing Page Discovery | ✅ Chốt | `phase-06-landing-page-discovery.md` |
+| 7 | Ad Intelligence | ✅ Chốt | `phase-07-ad-intelligence.md` |
+| 8 | Competitor Intelligence | ✅ Chốt | `phase-08-competitor-intelligence.md` |
+| 9 | Output Schema | ✅ Chốt | `phase-09-output-schema.md` |
 | 10 | Validation | ⬜ Chưa viết | — |
 | 11 | Storage | ⬜ Chưa viết | — |
 | 12 | Scalability | ⬜ Chưa viết | — |
@@ -99,6 +99,44 @@ Lý do: bảo vệ thời gian chạy, checkpoint và ngân sách API. Vượt t
 ### ADR-010 — Bổ sung chế độ `dry_run`
 Chạy đủ validate, chuẩn hoá, phân giải market và in bảng ước tính chi phí, không gọi API
 dòng nào. Đây là hàng rào cuối trước khi đốt quota.
+
+### ADR-011 — Phân lớp đối thủ và overlap không nhiễu thương hiệu (Phase 3)
+Đối thủ phân ba lớp `direct_broker / affiliate_review / informational` bằng luật trên
+tín hiệu quan sát (`classification_signals`), không bằng phán đoán model. Overlap tính
+**sau khi loại keyword `is_branded`** — nếu không, site review trùng toàn bộ keyword
+thương hiệu sẽ giả làm đối thủ trực tiếp.
+
+### ADR-012 — Intent `trust_check` và cụm keyword bằng cấu trúc (Phase 4)
+Thêm intent `trust_check` (scam/lừa đảo/uy tín) bên cạnh bốn intent kinh điển — nhóm
+volume lớn, hành vi khác commercial. Intent gán bằng lexicon theo market (`intent_method`),
+không bằng model. Cụm nhận diện bằng `head_keyword_id` + `cluster_method`, KHÔNG bằng
+nhãn prose do model sinh (tránh field text tự do).
+
+### ADR-013 — SERP theo device và mô hình khối (Phase 5)
+`device` (`mobile`/`desktop`) là chiều BẮT BUỘC của `SerpSnapshot` — ads hai device
+khác nhau đáng kể. Vị trí dùng `block_rank` + `rank_in_block`, không dùng "position"
+đơn lẻ; `is_ad` tách quảng cáo khỏi organic.
+
+### ADR-014 — Landing page: subdomain riêng và tách-nhưng-ghi tham số (Phase 6)
+Trang đích quảng cáo thường ở subdomain `lp/go/promo` và `noindex`. Tách tham số
+affiliate khỏi `url_canonical` NHƯNG lưu `stripped_params[]` và `redirect_chain[]` —
+sạch để dedup mà không mất tình báo affiliate.
+
+### ADR-015 — Ad chỉ lưu nguyên văn, cấm sinh nội dung (Phase 7)
+Điểm rủi ro mandate cao nhất. Mọi text ad mang hậu tố `_observed` + provenance; phân
+tích pattern chỉ trả tần suất và cờ hiện diện khách quan (`observed_flags`). Schema `Ad`
+CỐ TÌNH không có field chứa câu quảng cáo mới — cưỡng chế ADR-002 tại điểm nóng.
+
+### ADR-016 — Không bao giờ lấy trung bình giữa nguồn (Phase 8)
+Nhiều nguồn lệch nhau: chọn `value` theo `source_priority.yaml`, lưu `values_by_source[]`,
+tính `divergence_ratio`; lệch > 3 lần thì `low_agreement=true` và trần confidence 0.5.
+Traffic/authority trần `estimate`; DR và AS là hai thang KHÔNG quy đổi.
+
+### ADR-017 — Output quan hệ, tham chiếu bằng ID (Phase 9)
+Bảy entity (`cmp_/kw_/clu_/srp_/lp_/ad_/prf_`) tham chiếu chéo bằng ID tất định, không
+lồng trùng dữ liệu. Dùng chung `Measurement` và `Provenance`. Mảng entity tuỳ chọn ở gốc
+để dataset bộ phận vẫn hợp lệ (fail-soft). `additionalProperties:false` + linter mandate
+là hai cổng cưỡng chế.
 
 ---
 
