@@ -9,14 +9,11 @@ không xếp hạng, không "keyword nên dùng".
 """
 from __future__ import annotations
 
+from research_agent.collectors.branding import is_branded
 from research_agent.core.identity import entity_id
 from research_agent.core.provenance import Provenance, Reliability
 from research_agent.core.types import Measurement
-from research_agent.intake.normalizers.text import (
-    casefold_text,
-    has_diacritics,
-    strip_diacritics,
-)
+from research_agent.intake.normalizers.text import casefold_text, has_diacritics
 from research_agent.intake.request_model import MarketRun
 from research_agent.providers.base import KeywordVolumeProvider
 
@@ -26,17 +23,6 @@ _UNIT_CPC = "usd"
 _UNIT_COMPETITION = "index_0_100"
 # Keyword metrics từ DataForSEO lấy trực tiếp từ Google Ads → hard (Phase 1 mục 2.6).
 _RELIABILITY = Reliability.HARD
-
-
-def _match_key(value: str) -> str:
-    """Khoá so khớp thương hiệu: bỏ dấu + casefold (để 'lừa đảo' vẫn khớp 'lua dao')."""
-    return strip_diacritics(casefold_text(value))
-
-
-def _is_branded(keyword: str, broker_name_normalized: str, aliases: tuple[str, ...]) -> bool:
-    hay = _match_key(keyword)
-    needles = [broker_name_normalized] + list(aliases)
-    return any(n and _match_key(n) in hay for n in needles)
 
 
 def _measurement(value, unit: str, provenance: Provenance, missing_label: str) -> dict:
@@ -78,7 +64,7 @@ def collect_keywords(
             "keyword_raw": row.keyword,
             "keyword_normalized": normalized,
             "has_diacritics": has_diacritics(row.keyword),
-            "is_branded": _is_branded(row.keyword, broker_name_normalized, broker_aliases),
+            "is_branded": is_branded(row.keyword, broker_name_normalized, broker_aliases),
             "search_volume": _measurement(row.search_volume, _UNIT_VOLUME, provenance, "search_volume"),
             "cpc": _measurement(row.cpc, _UNIT_CPC, provenance, "cpc"),
             "competition_index": _measurement(

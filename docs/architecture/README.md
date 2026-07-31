@@ -25,14 +25,16 @@ Mã nguồn: lát cắt dọc đầu tiên (`CLAUDE.md` mục 7) đã thông end
 |---|---|---|
 | 1 | `core` (types, provenance, identity, errors, logging) | ✅ Xong + unit test |
 | 2 | `intake` (6 chặng, PSL, market_resolver) | ✅ Xong + unit test |
-| 3 | `providers` (base, registry, DataForSeoAdapter) | ✅ Xong + contract test |
-| 4 | `collectors/keyword_research` | ✅ Xong |
-| 5 | End-to-end 1 broker × 1 market (VN-vi) → JSON hợp lệ | ✅ Xong (test offline trên fixture) |
-| 6 | Nhân rộng adapter/collector còn lại | ⬜ Chỉ làm sau khi luồng trên được review |
+| 3 | `providers` (base, registry, DataForSeoAdapter, AhrefsAdapter) | ✅ Xong + contract test |
+| 4 | `collectors/keyword_research` (Phase 4) | ✅ Xong + e2e |
+| 5 | `collectors/competitor_discovery` (Phase 3) | ✅ Xong + e2e (overlap loại branded) |
+| 6 | End-to-end 1 broker × 1 market (VN-vi) → JSON hợp lệ | ✅ Xong (test offline trên fixture) |
+| 7 | Collector còn lại: SERP, landing_page, ad_intelligence, competitor_intelligence | ⬜ Chưa hiện thực |
+| 8 | Module `resolve/validate/storage/output/orchestration/observability` | ⬜ Chưa hiện thực |
 
-`config/schemas/canonical.v1.json` hiện là **lát cắt tối thiểu** của Phase 9 (chỉ
-`Provenance`/`Measurement`/`Keyword`). Phase 9 đầy đủ (cmp_/srp_/lp_/ad_/prf_) vẫn
-chưa chốt — cần hoàn tất trước khi mở các collector còn lại.
+`config/schemas/canonical.v1.json` đã là **hợp đồng đầy đủ** (Phase 9 chốt): bảy entity
+`cmp_/kw_/clu_/srp_/lp_/ad_/prf_` + `Measurement`/`Provenance` dùng chung. Đã hiện thực
+`Keyword` (Phase 4) và `Competitor` (Phase 3), phần còn lại chờ collector tương ứng.
 
 Việc con người còn nợ (HANDOFF mục 5): điền `location_code` thật vào
 `config/markets.yaml` từ endpoint `/locations`, và nạp credentials provider. Code

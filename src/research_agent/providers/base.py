@@ -19,6 +19,8 @@ from research_agent.core.types import FetchEnvelope
 CAP_KEYWORD_VOLUME = "keyword_volume"
 CAP_KEYWORD_CPC = "keyword_cpc"
 CAP_KEYWORD_COMPETITION = "keyword_competition"
+CAP_ORGANIC_COMPETITORS = "organic_competitors"
+CAP_ORGANIC_KEYWORDS = "organic_keywords"
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,19 @@ class KeywordMetricRow:
     search_volume: Optional[int] = None
     cpc: Optional[float] = None
     competition_index: Optional[int] = None
+
+
+@dataclass(frozen=True)
+class CompetitorDomainRow:
+    """Một domain đối thủ phát hiện từ nguồn organic/paid, ĐÃ tách khỏi format provider.
+
+    `reported_common_keywords` là số keyword chung do provider báo — CHƯA loại thương
+    hiệu, nên chỉ dùng làm gợi ý xếp hạng khám phá, KHÔNG phải overlap sạch (ADR-011).
+    """
+
+    domain: str
+    sample_url: Optional[str] = None
+    reported_common_keywords: Optional[int] = None
 
 
 class ProviderAdapter(abc.ABC):
@@ -64,3 +79,23 @@ class KeywordVolumeProvider(ProviderAdapter):
     @abc.abstractmethod
     def parse_keyword_volume(self, envelope: FetchEnvelope) -> list[KeywordMetricRow]:
         """Hàm THUẦN: raw payload → rows. Contract-test trên fixture."""
+
+
+class CompetitorProvider(ProviderAdapter):
+    """Adapter phục vụ organic_competitors + organic_keywords (Phase 3)."""
+
+    @abc.abstractmethod
+    def fetch_organic_competitors(self, target_domain: str, *, country) -> FetchEnvelope:
+        """Chạm mạng. KHÔNG unit-test offline."""
+
+    @abc.abstractmethod
+    def parse_organic_competitors(self, envelope: FetchEnvelope) -> list[CompetitorDomainRow]:
+        """Hàm THUẦN: raw → danh sách domain đối thủ. Contract-test trên fixture."""
+
+    @abc.abstractmethod
+    def fetch_organic_keywords(self, domain: str, *, country) -> FetchEnvelope:
+        """Chạm mạng. KHÔNG unit-test offline."""
+
+    @abc.abstractmethod
+    def parse_organic_keywords(self, envelope: FetchEnvelope) -> list[str]:
+        """Hàm THUẦN: raw → danh sách keyword (raw string). Contract-test trên fixture."""

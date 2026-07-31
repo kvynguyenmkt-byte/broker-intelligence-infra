@@ -1,0 +1,19 @@
+{
+  "competitors": [
+    {
+      "domain": "fpmarkets.com",
+      "common_keywords": 512,
+      "best_position_url": "https://fpmarkets.com/vn/"
+    },
+    {
+      "domain": "topbrokerreview.com",
+      "common_keywords": 843,
+      "best_position_url": "https://topbrokerreview.com/best-forex-brokers-vietnam/"
+    },
+    {
+      "domain": "hocforex.net",
+      "common_keywords": 176,
+      "best_position_url": "https://hocforex.net/kien-thuc/forex-la-gi/"
+    }
+  ]
+}

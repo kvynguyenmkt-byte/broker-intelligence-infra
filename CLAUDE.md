@@ -127,10 +127,11 @@ Lý do: canonical model gần như chắc chắn sai ở lần đầu. Phát hi�
 
 Đã chốt thiết kế: Phase 1–12 (đầy đủ, System Architecture → Scalability).
 
-Mã nguồn: lát cắt dọc đầu tiên đã thông end-to-end offline —
-`core/` + `intake/` + `providers/` (DataForSeoAdapter) + `collectors/keyword_research/`,
+Mã nguồn: đã thông end-to-end offline —
+`core/` + `intake/` + `providers/` (DataForSeoAdapter, AhrefsAdapter) +
+`collectors/keyword_research/` (Phase 4) + `collectors/competitor_discovery/` (Phase 3),
 xuất JSON hợp lệ theo `config/schemas/canonical.v1.json`. Các collector còn lại
-(Phase 3, 5, 6, 7, 8) chưa hiện thực; theo mục 7, chỉ nhân rộng sau khi lát cắt được review.
+(Phase 5 SERP, 6 landing_page, 7 ad_intelligence, 8 competitor_intelligence) chưa hiện thực.
 
 Xem `docs/architecture/README.md` để biết nhật ký quyết định và việc còn lại.
 Xem `HANDOFF.md` để biết cách tiếp tục.
