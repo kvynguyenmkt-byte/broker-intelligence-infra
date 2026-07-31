@@ -125,8 +125,7 @@ Lý do: canonical model gần như chắc chắn sai ở lần đầu. Phát hi�
 
 ## 9. Trạng thái dự án
 
-Đã chốt thiết kế: Phase 1–9 (System Architecture → Output Schema).
-Chưa viết thiết kế: Phase 10 (Validation), 11 (Storage), 12 (Scalability).
+Đã chốt thiết kế: Phase 1–12 (đầy đủ, System Architecture → Scalability).
 
 Mã nguồn: lát cắt dọc đầu tiên đã thông end-to-end offline —
 `core/` + `intake/` + `providers/` (DataForSeoAdapter) + `collectors/keyword_research/`,

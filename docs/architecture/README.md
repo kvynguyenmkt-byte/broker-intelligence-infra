@@ -15,9 +15,9 @@ Cập nhật: 2026-07-31
 | 7 | Ad Intelligence | ✅ Chốt | `phase-07-ad-intelligence.md` |
 | 8 | Competitor Intelligence | ✅ Chốt | `phase-08-competitor-intelligence.md` |
 | 9 | Output Schema | ✅ Chốt | `phase-09-output-schema.md` |
-| 10 | Validation | ⬜ Chưa viết | — |
-| 11 | Storage | ⬜ Chưa viết | — |
-| 12 | Scalability | ⬜ Chưa viết | — |
+| 10 | Validation | ✅ Chốt | `phase-10-validation.md` |
+| 11 | Storage | ✅ Chốt | `phase-11-storage.md` |
+| 12 | Scalability | ✅ Chốt | `phase-12-scalability.md` |
 
 Mã nguồn: lát cắt dọc đầu tiên (`CLAUDE.md` mục 7) đã thông end-to-end, offline.
 
@@ -137,6 +137,23 @@ Bảy entity (`cmp_/kw_/clu_/srp_/lp_/ad_/prf_`) tham chiếu chéo bằng ID t�
 lồng trùng dữ liệu. Dùng chung `Measurement` và `Provenance`. Mảng entity tuỳ chọn ở gốc
 để dataset bộ phận vẫn hợp lệ (fail-soft). `additionalProperties:false` + linter mandate
 là hai cổng cưỡng chế.
+
+### ADR-018 — Validation phát hiện, không sửa (Phase 10)
+`validate` gồm ba lớp: schema (canonical.v1.json), business rules, QA gate. Chỉ báo lỗi,
+KHÔNG bao giờ tự sửa — sửa lặng lẽ là cách dữ liệu bẩn sống sót. Kiểm toàn vẹn tham chiếu
+mọi `*_id`. Phân biệt `block` (dữ liệu sai/tham chiếu gãy) và `warn` (chất lượng yếu); chỉ
+`block` khi tiếp tục tạo dữ liệu sai. Linter mandate là một luật validation.
+
+### ADR-019 — Lưu trữ ba tầng, raw bất biến content-addressed (Phase 11)
+Bốn kho: `raw` (write-once, content-addressed, cho replay không tốn API), `normalized`,
+`snapshots` (có `schema_version`), `cache` (TTL theo loại từ `providers.yaml`). `storage`
+không biến đổi dữ liệu. Retention cấu hình được, đặt từ ngày đầu vì raw tốn dung lượng.
+
+### ADR-020 — Checkpoint theo market, nâng cấp B→C khi có tải (Phase 12)
+Đơn vị checkpoint/song song là `market_run_id`; một market fail chuyển `partial`, không
+sập run; resume dùng raw cache nên không gọi lại API. Song song ba trục broker/market/
+collector, tôn trọng `rate_limit` từng provider. Giữ `orchestration` không chứa nghiệp vụ
+để nâng DAG in-process → hàng đợi message chỉ khi có tải biện minh (ADR-001).
 
 ---
 
