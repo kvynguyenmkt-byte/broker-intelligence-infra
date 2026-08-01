@@ -41,7 +41,12 @@ def has_diacritics(value: str) -> bool:
     return any(unicodedata.combining(ch) for ch in decomposed)
 
 
+# 'đ'/'Đ' (U+0111/U+0110) là chữ cái riêng, NFD KHÔNG tách ra combining mark — phải
+# ánh xạ tay, nếu không 'lừa đảo' -> 'lua đao' và mọi so khớp không dấu sẽ trượt.
+_DSTROKE = str.maketrans({"đ": "d", "Đ": "D"})
+
+
 def strip_diacritics(value: str) -> str:
-    """Bỏ dấu (chỉ để so khớp phụ trợ, KHÔNG thay thế keyword_raw)."""
-    decomposed = unicodedata.normalize("NFD", value)
+    """Bỏ dấu (chỉ để so khớp phụ trợ, KHÔNG thay thế keyword_raw). Xử lý cả 'đ'."""
+    decomposed = unicodedata.normalize("NFD", value.translate(_DSTROKE))
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch))

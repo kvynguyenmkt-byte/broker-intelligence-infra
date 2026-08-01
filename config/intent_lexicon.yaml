@@ -1,0 +1,33 @@
+# intent_lexicon.yaml — Gán intent keyword bằng lexicon theo ngôn ngữ (Phase 4, ADR-012).
+#
+# Token lưu dạng ĐÃ BỎ DẤU + chữ thường, so khớp theo BIÊN TỪ với
+# strip_diacritics(casefold(keyword)). 'trust_check' là nhóm bắt buộc của vertical
+# forex (scam/lừa đảo/uy tín) — volume lớn, hành vi khác commercial.
+#
+# Thứ tự ưu tiên khi một keyword khớp nhiều intent:
+#   trust_check > transactional > navigational > commercial > informational
+# Không khớp intent nào → để TRỐNG (không suy đoán, No fabrication).
+
+version: 1
+
+priority: [trust_check, transactional, navigational, commercial, informational]
+
+languages:
+  vi:
+    trust_check: [lua dao, scam, uy tin, co nen, that khong, co that, danh gia, review, co uy tin, co lua dao]
+    transactional: [mo tai khoan, nap tien, rut tien, dang ky, mo tk, nap rut, nap]
+    navigational: [dang nhap, login, app, tai app, trang chu]
+    commercial: [san forex, san giao dich, broker, spread thap, don bay, hoa hong, phi giao dich, spread]
+    informational: [la gi, cach, huong dan, kien thuc, hoc, tim hieu]
+  en:
+    trust_check: [scam, legit, review, trustworthy, safe, reliable]
+    transactional: [open account, deposit, withdraw, sign up, register]
+    navigational: [login, sign in, app, download]
+    commercial: [forex broker, broker, low spread, leverage, trading account, spread]
+    informational: [what is, how to, guide, learn, tutorial]
+  id:
+    trust_check: [penipuan, scam, aman, terpercaya, ulasan, review]
+    transactional: [buka akun, deposit, tarik dana, daftar]
+    navigational: [masuk, login, aplikasi, unduh]
+    commercial: [broker forex, broker, spread rendah, leverage, swap free, syariah]
+    informational: [apa itu, cara, panduan, belajar]

@@ -26,7 +26,7 @@ Mã nguồn: lát cắt dọc đầu tiên (`CLAUDE.md` mục 7) đã thông end
 | 1 | `core` (types, provenance, identity, errors, logging) | ✅ Xong + unit test |
 | 2 | `intake` (6 chặng, PSL, market_resolver) | ✅ Xong + unit test |
 | 3 | `providers` (base, registry, DataForSeoAdapter, AhrefsAdapter) | ✅ Xong + contract test |
-| 4 | `collectors/keyword_research` (Phase 4) | ✅ Xong + e2e |
+| 4 | `collectors/keyword_research` (Phase 4) — metrics + intent + cụm + thống kê | ✅ Xong + e2e |
 | 5 | `collectors/competitor_discovery` (Phase 3) | ✅ Xong + e2e (overlap loại branded) |
 | 6 | `collectors/serp_research` (Phase 5) | ✅ Xong + e2e (device + mô hình khối) |
 | 7 | End-to-end 1 broker × 1 market (VN-vi) → JSON hợp lệ | ✅ Xong (test offline trên fixture) |
@@ -35,8 +35,13 @@ Mã nguồn: lát cắt dọc đầu tiên (`CLAUDE.md` mục 7) đã thông end
 
 `config/schemas/canonical.v1.json` đã là **hợp đồng đầy đủ** (Phase 9 chốt): bảy entity
 `cmp_/kw_/clu_/srp_/lp_/ad_/prf_` + `Measurement`/`Provenance` dùng chung. Đã hiện thực
-`Keyword` (Phase 4), `Competitor` (Phase 3), `SerpSnapshot` (Phase 5); phần còn lại chờ
-collector tương ứng.
+`Keyword` + `KeywordCluster` (Phase 4), `Competitor` (Phase 3), `SerpSnapshot` (Phase 5);
+phần còn lại chờ collector tương ứng.
+
+Keyword flow đầy đủ để **thống kê & chốt keyword**: `collect_keywords` (metrics) →
+`enrich_intent` (lexicon, gồm `trust_check`, config `intent_lexicon.yaml`) →
+`cluster_keywords` (cấu trúc `lexical_shared_token`) → `keyword_statistics` (đếm/cộng
+khách quan). KHÔNG sinh nội dung ads — đó là việc con người sau khi chốt keyword.
 
 Việc con người còn nợ (HANDOFF mục 5): điền `location_code` thật vào
 `config/markets.yaml` từ endpoint `/locations`, và nạp credentials provider. Code

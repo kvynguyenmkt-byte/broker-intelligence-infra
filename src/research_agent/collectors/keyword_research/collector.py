@@ -9,6 +9,8 @@ không xếp hạng, không "keyword nên dùng".
 """
 from __future__ import annotations
 
+from typing import Optional
+
 from research_agent.collectors.branding import is_branded
 from research_agent.core.identity import entity_id
 from research_agent.core.provenance import Provenance, Reliability
@@ -74,6 +76,14 @@ def collect_keywords(
     return keywords
 
 
-def build_keyword_dataset(keywords: list[dict], *, schema_version: str = "1.0.0") -> dict:
-    """Bọc list Keyword thành dataset canonical hợp lệ."""
-    return {"schema_version": schema_version, "keywords": keywords}
+def build_keyword_dataset(
+    keywords: list[dict],
+    clusters: Optional[list[dict]] = None,
+    *,
+    schema_version: str = "1.0.0",
+) -> dict:
+    """Bọc list Keyword (+ KeywordCluster tuỳ chọn) thành dataset canonical hợp lệ."""
+    doc = {"schema_version": schema_version, "keywords": keywords}
+    if clusters is not None:
+        doc["keyword_clusters"] = clusters
+    return doc
