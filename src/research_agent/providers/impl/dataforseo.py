@@ -30,6 +30,8 @@ from research_agent.providers.base import (
 _BASE_URL = "https://api.dataforseo.com/v3"
 _SEARCH_VOLUME_ENDPOINT = "keywords_data/google_ads/search_volume/live"
 _SERP_ENDPOINT = "serp/google/organic/live/advanced"
+_USER_DATA_ENDPOINT = "appendix/user_data"  # MIỄN PHÍ — dùng để verify auth
+_LOCATIONS_ENDPOINT = "keywords_data/google_ads/locations"  # MIỄN PHÍ
 _DATAFORSEO_OK = 20000  # status_code thành công của DataForSEO
 
 
@@ -154,7 +156,19 @@ class DataForSeoAdapter(KeywordVolumeProvider, SerpProvider):
         }]
         return self._post(_SERP_ENDPOINT, payload)
 
-    def _post(self, endpoint: str, payload: list) -> FetchEnvelope:
+    # -------------------------------------------------- connect / verify (free)
+    def check_connection(self) -> FetchEnvelope:
+        """Verify auth qua endpoint MIỄN PHÍ `appendix/user_data` (không tốn query).
+
+        Trả FetchEnvelope OK khi credentials hợp lệ; raw chứa balance + limits.
+        """
+        return self._get(_USER_DATA_ENDPOINT)
+
+    def fetch_locations(self) -> FetchEnvelope:
+        """Lấy danh mục location Google Ads (MIỄN PHÍ) để tra `location_code`."""
+        return self._get(_LOCATIONS_ENDPOINT)
+
+    def _auth_token(self) -> str:
         login = os.environ.get("DATAFORSEO_LOGIN")
         password = os.environ.get("DATAFORSEO_PASSWORD")
         if not login or not password:
@@ -162,13 +176,26 @@ class DataForSeoAdapter(KeywordVolumeProvider, SerpProvider):
                 "Thiếu DATAFORSEO_LOGIN/DATAFORSEO_PASSWORD trong biến môi trường "
                 "(CLAUDE.md mục 5)."
             )
-        token = base64.b64encode(f"{login}:{password}".encode()).decode()
+        return base64.b64encode(f"{login}:{password}".encode()).decode()
+
+    def _get(self, endpoint: str) -> FetchEnvelope:
+        req = urllib.request.Request(
+            f"{_BASE_URL}/{endpoint}",
+            headers={"Authorization": f"Basic {self._auth_token()}"},
+            method="GET",
+        )
+        return self._send(req, endpoint)
+
+    def _post(self, endpoint: str, payload: list) -> FetchEnvelope:
         req = urllib.request.Request(
             f"{_BASE_URL}/{endpoint}",
             data=json.dumps(payload).encode("utf-8"),
-            headers={"Authorization": f"Basic {token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Basic {self._auth_token()}", "Content-Type": "application/json"},
             method="POST",
         )
+        return self._send(req, endpoint)
+
+    def _send(self, req: "urllib.request.Request", endpoint: str) -> FetchEnvelope:
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
